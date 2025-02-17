@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Student Profile - Zone01</title>
+    <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
+  </head>
+  <body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+      <form class="login-form" id="handleLogin">
+        <h1>Zone01 Login</h1>
+        <div class="form-group">
+          <input type="text" id="username" placeholder="Username or Email" />
+        </div>
+        <div class="form-group">
+          <input type="password" id="password" placeholder="Password" />
+        </div>
+        <button class="button" type="submit">Sign In</button>
+        <div id="errorMessage" class="error-message"></div>
+      </form>
+    </div>
+
+    <!-- Profile Page -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+    </div>
+    <div id="profilePage" style="display: none">
+      <div class="profile-header">
+        <h1 id="userName"></h1>
+        <p id="userEmail"></p>
+      </div>
+
+      <div class="container">
+        <div class="stats-grid">
+          <button class="logout-btn" id="logoutButton">Logout</button>
+          <div class="stat-card">
+            <h3>Total XP</h3>
+            <p id="totalXP">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Audit Ratio</h3>
+            <p id="auditRatio">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Completed Projects</h3>
+            <p id="completedProjects">0</p>
+          </div>
+        </div>
+
+        <div class="graph-container">
+          <h2>XP Progress Over Time</h2>
+          <svg id="xpChart" width="100%" height="400"></svg>
+        </div>
+
+        <div class="graph-container">
+          <h2>Project Success Rate</h2>
+          <svg id="projectChart" width="100%" height="400"></svg>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
