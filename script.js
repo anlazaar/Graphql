@@ -9,9 +9,11 @@ function logout() {
 // HELPERS
 function formatXP(xp) {
   if (xp >= 1000000) {
-    return Math.ceil(xp / 1_000_000) + " MB";
+    return Math.round(xp / 1000000) + " MB";
+  } else if (xp >= 100000) {
+    return Math.round(xp / 1000) + " kB";
   } else if (xp >= 1000) {
-    return Math.ceil(xp / 1_000) + " kB";
+    return (xp / 1000).toFixed(1).replace(".0", "") + " kB";
   } else {
     return xp.toLocaleString();
   }
@@ -21,7 +23,12 @@ function formatXP(xp) {
 const totalXPCalculate = (transactions) => {
   const totalXP = transactions
     ? transactions.reduce((sum, tx) => {
-        if (tx.path.startsWith("/oujda/module/") && tx.type == "xp") {
+        if (
+          tx.path.startsWith("/oujda/module/") &&
+          tx.type == "xp" &&
+          !tx.path.includes("piscine-js")
+        ) {
+          console.log(tx);
           return sum + tx.amount;
         }
         return sum;
@@ -37,16 +44,28 @@ const totalXPCalculate = (transactions) => {
 // Calculate completed projects
 const completedProjectsCalculation = (progresses) => {
   console.log("USER PROGRESSES:\n", progresses);
-  const completedProjects = progresses
-    ? progresses.filter(
-        (p) =>
-          p.grade !== null &&
-          p.grade >= 1 &&
-          p.path.startsWith("/oujda/module/") &&
-          !p.path.startsWith("/oujda/module/checkpoint")
-      ).length
-    : 0;
-  return completedProjects;
+
+  if (!progresses) return 0;
+
+  const uniquePaths = new Set();
+  const completedProjects = progresses.reduce((acc, p) => {
+    if (
+      p.grade !== null &&
+      p.grade >= 1 &&
+      !p.path.includes("checkpoint") &&
+      !p.path.includes("piscine-go") &&
+      !p.path.includes("piscine-js") &&
+      !p.path.includes("onboarding") &&
+      !uniquePaths.has(p.path) // Ensure it's not a duplicate
+    ) {
+      uniquePaths.add(p.path);
+      acc.push(p);
+    }
+    return acc;
+  }, []);
+
+  console.log("THE COMPLETED PROJECTS:\n", completedProjects);
+  return completedProjects.length;
 };
 
 // Calculate Audit Ratio
@@ -106,12 +125,14 @@ async function handleLogin(e) {
         `Invalid JWT format: expected 3 parts, got ${parts.length}`
       );
     }
+    console.log(`Invalid JWT format: expected 3 parts, got ${parts.length}`);
 
     // Verify each part is valid base64url
     for (let i = 0; i < parts.length; i++) {
       try {
         // Convert base64url to base64
         const base64 = parts[i].replace(/-/g, "+").replace(/_/g, "/");
+        console.log("BASE64URL TO BASE64:\n ", parts[i], "\n", base64);
 
         // Pad with '=' if needed
         const pad = base64.length % 4;
@@ -189,7 +210,6 @@ async function loadProfile() {
     return logout();
   }
 
-  // Show loading spinner
   document.getElementById("loading").style.display = "flex";
 
   try {
@@ -204,6 +224,7 @@ async function loadProfile() {
       type
       amount
       path
+      createdAt
     }
     progresses {
       grade
@@ -222,15 +243,13 @@ async function loadProfile() {
     }
 
     const user = userData.data.user[0];
-    console.log(user);
+    console.log("User data:", user);
     renderProfile(user);
   } catch (error) {
     console.error("Error in loadProfile:", error);
     document.getElementById("errorMessage").textContent =
       "Failed to load profile data. Please try logging in again.";
-    // logout();
   } finally {
-    // Hide loading spinner
     document.getElementById("loading").style.display = "none";
   }
 }
@@ -245,24 +264,255 @@ function renderProfile(user) {
   document.getElementById("userName").textContent = user.login;
   document.getElementById("userEmail").textContent = user.email;
 
-  console.log("USER TRANSACTIONS:\n", user.transactions);
-
   const totalXP = totalXPCalculate(user.transactions);
-  // Set the XP
   document.getElementById("totalXP").textContent = formatXP(totalXP);
 
   const completedProjects = completedProjectsCalculation(user.progresses);
   document.getElementById("completedProjects").textContent = completedProjects;
 
-  console.log("USER RESULTS:\n", user.results);
-
   const auditRatio = auditRatioCalculator(user.transactions);
-  console.log("Final Audits Ratio:", auditRatio);
-  // Set the Audit Ratio
   document.getElementById("auditRatio").textContent = auditRatio;
+
+  // Render charts
+  renderXPProgressChart(user.transactions);
+  renderProjectSuccessChart(user.progresses);
 
   // Show profile page
   showProfilePage();
+}
+
+function renderXPProgressChart(transactions) {
+  if (!transactions || transactions.length === 0) {
+    console.error("No transaction data available");
+    return;
+  }
+
+  // Filter and sort XP transactions
+  const xpData = transactions
+    .filter(
+      (tx) =>
+        tx.type === "xp" &&
+        tx.path.startsWith("/oujda/module/") &&
+        !tx.path.includes("piscine-js")
+    )
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+  console.log("XP Data points:", xpData);
+
+  if (xpData.length === 0) {
+    console.error("No XP transactions found");
+    return;
+  }
+
+  // Calculate cumulative XP
+  let cumulativeXP = 0;
+  const dataPoints = xpData.map((tx) => {
+    cumulativeXP += tx.amount;
+    return { xp: cumulativeXP, date: new Date(tx.createdAt) };
+  });
+
+  console.log("Processed data points:", dataPoints);
+
+  // Get SVG dimensions
+  const svg = document.getElementById("xpChart");
+  const width = svg.clientWidth || 800; // Fallback width
+  const height = svg.clientHeight || 400; // Fallback height
+  const padding = 60; // Increased padding for labels
+
+  // Clear previous content
+  svg.innerHTML = "";
+
+  // Calculate scales
+  const maxXP = Math.max(...dataPoints.map((d) => d.xp));
+  const xScale = (width - 2 * padding) / (dataPoints.length - 1);
+  const yScale = (height - 2 * padding) / maxXP;
+
+  // Create path data
+  let pathData = "";
+  dataPoints.forEach((point, i) => {
+    const x = padding + i * xScale;
+    const y = height - padding - point.xp * yScale;
+    pathData += `${i === 0 ? "M" : "L"} ${x} ${y}`;
+  });
+
+  // Create grid lines and labels
+  const gridLines = [];
+  const yLabels = [];
+  const numGridLines = 5;
+
+  for (let i = 0; i <= numGridLines; i++) {
+    const y = height - padding - ((height - 2 * padding) * i) / numGridLines;
+    const xpValue = (maxXP * i) / numGridLines;
+
+    gridLines.push(`
+      <line 
+        x1="${padding}" 
+        y1="${y}" 
+        x2="${width - padding}" 
+        y2="${y}" 
+        stroke="rgba(255,255,255,0.1)" 
+        stroke-dasharray="4"
+      />
+    `);
+
+    yLabels.push(`
+      <text 
+        x="${padding - 10}" 
+        y="${y}" 
+        fill="var(--text-dim)"
+        text-anchor="end"
+        alignment-baseline="middle"
+        style="font-size: 12px"
+      >${formatXP(Math.round(xpValue))}</text>
+    `);
+  }
+
+  // Add SVG elements with improved gradient
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:rgba(255,68,68,0.6);stop-opacity:0.8" />
+        <stop offset="100%" style="stop-color:rgba(255,68,68,0.6);stop-opacity:0" />
+      </linearGradient>
+    </defs>
+    
+    <!-- Grid lines -->
+    ${gridLines.join("")}
+    
+    <!-- Y-axis labels -->
+    ${yLabels.join("")}
+    
+    <!-- Area fill -->
+    <path 
+      d="${pathData} L ${width - padding} ${height - padding} L ${padding} ${
+    height - padding
+  } Z"
+      fill="url(#lineGradient)"
+      opacity="0.3"
+    />
+    
+    <!-- Line -->
+    <path
+      d="${pathData}"
+      stroke="rgba(255,68,68,0.8)"
+      stroke-width="3"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    
+    <!-- Data points -->
+    ${dataPoints
+      .map((point, i) => {
+        const x = padding + i * xScale;
+        const y = height - padding - point.xp * yScale;
+        return `
+        <circle 
+          cx="${x}" 
+          cy="${y}" 
+          r="4" 
+          fill="rgba(255,68,68,0.8)"
+          stroke="var(--paper-dark)"
+          stroke-width="2"
+        />
+      `;
+      })
+      .join("")}
+  `;
+}
+
+function renderProjectSuccessChart(progresses) {
+  if (!progresses || progresses.length === 0) {
+    console.error("No progress data available");
+    return;
+  }
+
+  // Filter and calculate success rates
+  const projectResults = progresses.filter(
+    (p) =>
+      p.grade !== null &&
+      !p.path.includes("checkpoint") &&
+      !p.path.includes("piscine") &&
+      !p.path.includes("onboarding")
+  );
+
+  console.log("Project results:", projectResults);
+
+  const totalProjects = projectResults.length;
+  const successfulProjects = projectResults.filter((p) => p.grade >= 1).length;
+  const successRate = (successfulProjects / totalProjects) * 100 || 0;
+
+  console.log(
+    `Success rate: ${successRate}% (${successfulProjects}/${totalProjects})`
+  );
+
+  // Get SVG element
+  const svg = document.getElementById("projectChart");
+  const width = svg.clientWidth || 400;
+  const height = svg.clientHeight || 400;
+  const radius = Math.min(width, height) / 3;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const strokeWidth = 30;
+
+  // Calculate arc path
+  const circumference = 2 * Math.PI * radius;
+  const dashArray = (successRate / 100) * circumference;
+
+  svg.innerHTML = `
+    <!-- Background circle -->
+    <circle
+      cx="${centerX}"
+      cy="${centerY}"
+      r="${radius}"
+      fill="none"
+      stroke="rgba(255,255,255,0.1)"
+      stroke-width="${strokeWidth}"
+    />
+    
+    <!-- Progress circle -->
+    <circle
+      cx="${centerX}"
+      cy="${centerY}"
+      r="${radius}"
+      fill="none"
+      stroke="rgba(255,68,68,0.6)"
+      stroke-width="${strokeWidth}"
+      stroke-dasharray="${dashArray} ${circumference}"
+      transform="rotate(-90 ${centerX} ${centerY})"
+      stroke-linecap="round"
+    />
+    
+    <!-- Percentage text -->
+    <text
+      x="${centerX}"
+      y="${centerY}"
+      fill="var(--text)"
+      text-anchor="middle"
+      alignment-baseline="middle"
+      style="font-size: 48px; font-family: 'Caveat', cursive; font-weight: bold;"
+    >${Math.round(successRate)}%</text>
+    
+    <!-- Label -->
+    <text
+      x="${centerX}"
+      y="${centerY + 40}"
+      fill="var(--text-dim)"
+      text-anchor="middle"
+      alignment-baseline="middle"
+      style="font-size: 16px;"
+    >Success Rate</text>
+    
+    <!-- Project count -->
+    <text
+      x="${centerX}"
+      y="${centerY + 70}"
+      fill="var(--text-dim)"
+      text-anchor="middle"
+      alignment-baseline="middle"
+      style="font-size: 14px;"
+    >${successfulProjects}/${totalProjects} Projects</text>
+  `;
 }
 
 function showProfilePage() {
@@ -320,7 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("handleLogin")
     .addEventListener("submit", handleLogin);
