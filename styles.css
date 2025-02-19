@@ -6,10 +6,10 @@
   --grid-color: rgba(255, 255, 255, 0.1);
   --text: #e0e0e0;
   --text-dim: rgba(224, 224, 224, 0.7);
-  --accent: #ffd700;
+  --accent: rgba(255, 68, 68, 0.6);
   --red-line: rgba(255, 68, 68, 0.6);
   --grid-size: 25px;
-  --glow: 0 0 10px rgba(255, 255, 255, 0.1);
+  --glow: 0 0 10px rgba(255, 0, 0, 0.1);
 }
 
 * {
@@ -98,7 +98,7 @@ body {
   margin-bottom: 2rem;
   color: var(--text);
   transform: rotate(-2deg);
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  text-shadow: 0 0 10px rgba(255, 17, 0, 0.3);
 }
 
 .form-group {
@@ -141,9 +141,9 @@ input:focus {
 }
 
 .button:hover {
-  background: rgba(255, 215, 0, 0.1);
+  background: rgba(255, 0, 0, 0.1);
   border-color: var(--accent);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
   transform: rotate(0deg);
 }
 
