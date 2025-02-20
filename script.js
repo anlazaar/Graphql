@@ -25,10 +25,10 @@ const totalXPCalculate = (transactions) => {
     ? transactions.reduce((sum, tx) => {
         if (
           tx.path.startsWith("/oujda/module/") &&
-          tx.type == "xp" &&
-          !tx.path.includes("piscine-js")
+          !tx.path.includes("onboarding") &&
+          !tx.path.includes("piscine-js") &&
+          tx.type == "xp"
         ) {
-          console.log(tx);
           return sum + tx.amount;
         }
         return sum;
@@ -273,9 +273,10 @@ function renderProfile(user) {
   const auditRatio = auditRatioCalculator(user.transactions);
   document.getElementById("auditRatio").textContent = auditRatio;
 
-  // Render charts
+  // Render all charts
   renderXPProgressChart(user.transactions);
   renderProjectSuccessChart(user.progresses);
+  renderXPDistributionChart(user.transactions); // Add this line
 
   // Show profile page
   showProfilePage();
@@ -289,12 +290,7 @@ function renderXPProgressChart(transactions) {
 
   // Filter and sort XP transactions
   const xpData = transactions
-    .filter(
-      (tx) =>
-        tx.type === "xp" &&
-        tx.path.startsWith("/oujda/module/") &&
-        !tx.path.includes("piscine-js")
-    )
+    .filter((tx) => tx.type === "xp" && tx.path.startsWith("/oujda/module/"))
     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   console.log("XP Data points:", xpData);
@@ -359,7 +355,7 @@ function renderXPProgressChart(transactions) {
       <text 
         x="${padding - 10}" 
         y="${y}" 
-        fill="var(--text-dim)"
+        fill="white"
         text-anchor="end"
         alignment-baseline="middle"
         style="font-size: 12px"
@@ -371,8 +367,8 @@ function renderXPProgressChart(transactions) {
   svg.innerHTML = `
     <defs>
       <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" style="stop-color:rgba(255,68,68,0.6);stop-opacity:0.8" />
-        <stop offset="100%" style="stop-color:rgba(255,68,68,0.6);stop-opacity:0" />
+        <stop offset="0%" style="stop-color:rgba(23, 62, 255, 0.6);stop-opacity:0.8" />
+        <stop offset="100%" style="stop-color:rgba(23, 62, 255, 0.6);stop-opacity:0" />
       </linearGradient>
     </defs>
     
@@ -394,7 +390,7 @@ function renderXPProgressChart(transactions) {
     <!-- Line -->
     <path
       d="${pathData}"
-      stroke="rgba(255,68,68,0.8)"
+      stroke="rgba(23, 62, 255, 0.8)"
       stroke-width="3"
       fill="none"
       stroke-linecap="round"
@@ -411,7 +407,7 @@ function renderXPProgressChart(transactions) {
           cx="${x}" 
           cy="${y}" 
           r="4" 
-          fill="rgba(255,68,68,0.8)"
+          fill="rgba(23, 62, 255, 0.8)"
           stroke="var(--paper-dark)"
           stroke-width="2"
         />
@@ -432,8 +428,8 @@ function renderProjectSuccessChart(progresses) {
     (p) =>
       p.grade !== null &&
       !p.path.includes("checkpoint") &&
-      !p.path.includes("piscine") &&
-      !p.path.includes("onboarding")
+      !p.path.includes("onboarding") &&
+      !p.path.includes("piscine")
   );
 
   console.log("Project results:", projectResults);
@@ -476,7 +472,7 @@ function renderProjectSuccessChart(progresses) {
       cy="${centerY}"
       r="${radius}"
       fill="none"
-      stroke="rgba(255,68,68,0.6)"
+      stroke="rgba(23, 62, 255, 0.6)"
       stroke-width="${strokeWidth}"
       stroke-dasharray="${dashArray} ${circumference}"
       transform="rotate(-90 ${centerX} ${centerY})"
@@ -487,7 +483,7 @@ function renderProjectSuccessChart(progresses) {
     <text
       x="${centerX}"
       y="${centerY}"
-      fill="var(--text)"
+      fill="white"
       text-anchor="middle"
       alignment-baseline="middle"
       style="font-size: 48px; font-family: 'Caveat', cursive; font-weight: bold;"
@@ -497,7 +493,7 @@ function renderProjectSuccessChart(progresses) {
     <text
       x="${centerX}"
       y="${centerY + 40}"
-      fill="var(--text-dim)"
+      fill="white"
       text-anchor="middle"
       alignment-baseline="middle"
       style="font-size: 16px;"
@@ -507,7 +503,7 @@ function renderProjectSuccessChart(progresses) {
     <text
       x="${centerX}"
       y="${centerY + 70}"
-      fill="var(--text-dim)"
+      fill="white"
       text-anchor="middle"
       alignment-baseline="middle"
       style="font-size: 14px;"
@@ -544,6 +540,164 @@ async function graphqlQuery(jwt, query) {
   }
 
   return result;
+}
+
+// Add this new function to render the XP distribution chart
+function renderXPDistributionChart(transactions) {
+  if (!transactions || transactions.length === 0) {
+    console.error("No transaction data available");
+    return;
+  }
+
+  // Filter XP transactions and group by path category
+  const xpByCategory = transactions
+    .filter((tx) => tx.type === "xp" && tx.path.startsWith("/oujda/module/"))
+    .reduce((acc, tx) => {
+      const category = tx.path.split("/")[3] || "other";
+      acc[category] = (acc[category] || 0) + tx.amount;
+      return acc;
+    }, {});
+
+  // Convert to array and sort by XP amount
+  const categoryData = Object.entries(xpByCategory)
+    .map(([category, xp]) => ({ category, xp }))
+    .sort((a, b) => b.xp - a.xp)
+    .slice(0, 8); // Show top 6 categories
+
+  console.log("XP by category:", categoryData);
+
+  // Get SVG element
+  const svg = document.getElementById("xpDistributionChart");
+  const width = svg.clientWidth || 800;
+  const height = svg.clientHeight || 400;
+  const padding = { top: 40, right: 30, bottom: 60, left: 60 };
+
+  // Clear previous content
+  svg.innerHTML = "";
+
+  // Calculate scales
+  const maxXP = Math.max(...categoryData.map((d) => d.xp));
+  const barWidth =
+    ((width - padding.left - padding.right) / categoryData.length) * 0.8;
+  const barGap =
+    ((width - padding.left - padding.right) / categoryData.length) * 0.2;
+  const yScale = (height - padding.top - padding.bottom) / maxXP;
+
+  // Create gradient definitions
+  const gradientDefs = `
+    <defs>
+      <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:rgba(23, 62, 255, 0.8)" />
+        <stop offset="100%" style="stop-color:rgba(23, 62, 255, 0.4)" />
+      </linearGradient>
+    </defs>
+  `;
+
+  // Create grid lines
+  const gridLines = [];
+  const numGridLines = 5;
+  for (let i = 0; i <= numGridLines; i++) {
+    const y =
+      height -
+      padding.bottom -
+      ((height - padding.top - padding.bottom) * i) / numGridLines;
+    const xpValue = (maxXP * i) / numGridLines;
+    gridLines.push(`
+      <line 
+        x1="${padding.left}" 
+        y1="${y}" 
+        x2="${width - padding.right}" 
+        y2="${y}" 
+        stroke="rgba(255,255,255,0.1)" 
+        stroke-dasharray="4"
+      />
+      <text 
+        x="${padding.left - 10}" 
+        y="${y}" 
+        fill="white"
+        text-anchor="end"
+        alignment-baseline="middle"
+        style="font-size: 12px"
+      >${formatXP(Math.round(xpValue))}</text>
+    `);
+  }
+
+  // Create bars and labels
+  const bars = categoryData
+    .map((d, i) => {
+      const x = padding.left + (barWidth + barGap) * i;
+      const barHeight = d.xp * yScale;
+      const y = height - padding.bottom - barHeight;
+
+      return `
+      <g class="bar-group">
+        <!-- Bar -->
+        <rect 
+          x="${x}"
+          y="${y}"
+          width="${barWidth}"
+          height="${barHeight}"
+          fill="url(#barGradient)"
+          rx="4"
+          class="bar"
+        />
+        
+        <!-- Project label -->
+        <text 
+          x="${x + barWidth / 2}"
+          y="${height - padding.bottom + 20}"
+          fill="white"
+          text-anchor="middle"
+          transform="rotate(-45, ${x + barWidth / 2}, ${
+        height - padding.bottom + 20
+      })"
+          style="font-size: 14px"
+        >${d.category}</text>
+        
+        <!-- XP value label -->
+        <text 
+          x="${x + barWidth / 2}"
+          y="${y - 10}"
+          fill="white"
+          text-anchor="middle"
+          style="font-size: 12px"
+        >${formatXP(d.xp)}</text>
+      </g>
+    `;
+    })
+    .join("");
+
+  // Add all elements to SVG
+  svg.innerHTML = `
+    ${gradientDefs}
+    
+    <!-- Grid lines and y-axis labels -->
+    ${gridLines.join("")}
+    
+    <!-- Bars and labels -->
+    ${bars}
+    
+    <!-- Chart title -->
+    <text
+      x="${width / 2}"
+      y="25"
+      fill="white"
+      text-anchor="middle"
+      style="font-size: 18px; font-family: 'Caveat', cursive;"
+    >XP Distribution by Project</text>
+  `;
+
+  // Add hover effects with CSS
+  const style = document.createElement("style");
+  style.textContent = `
+    .bar {
+      transition: all 0.3s ease;
+    }
+    .bar-group:hover .bar {
+      filter: brightness(1.2);
+    }
+  `;
+  svg.appendChild(style);
 }
 
 // Render Profile Info
