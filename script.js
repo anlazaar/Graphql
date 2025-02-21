@@ -831,14 +831,6 @@ function renderXPDistributionChart(transactions) {
     <!-- Bars and labels -->
     ${bars}
     
-    <!-- Chart title -->
-    <text
-      x="${width / 2}"
-      y="25"
-      fill="white"
-      text-anchor="middle"
-      style="font-size: 18px; font-weight: bold;"
-    >XP Distribution by Project</text>
   `;
 
   // Add hover effects and interactivity with CSS and JavaScript
