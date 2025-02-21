@@ -774,9 +774,7 @@ function renderXPDistributionChart(transactions) {
           y="${height - padding.bottom + 20}"
           fill="white"
           text-anchor="middle"
-          transform="rotate(-45, ${x + barWidth / 2}, ${
-        height - padding.bottom + 20
-      })"
+        "
           style="font-size: 14px; opacity: 0;"
         >
           ${d.category}
