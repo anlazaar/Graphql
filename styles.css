@@ -324,3 +324,47 @@ input:focus {
 #profilePage {
   animation: fadeIn 0.5s ease-out;
 }
+
+svg {
+  width: 100%; /* or any specific width */
+}
+
+.project-chart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.project-list-container {
+  width: 40%;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0 10px;
+}
+
+.project-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.project-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.project-status.success {
+  background-color: #4caf50;
+}
+
+.project-status.failure {
+  background-color: #f44336;
+}
