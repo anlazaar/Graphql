@@ -651,13 +651,13 @@ function renderXPDistributionChart(transactions) {
   const categoryData = Object.entries(xpByCategory)
     .map(([category, xp]) => ({ category, xp }))
     .sort((a, b) => b.xp - a.xp)
-    .slice(0, 5); // Show top 5 project
+    .slice(0, 6); // Show top 5 project
 
   console.log("XP by category:", categoryData);
 
   // Get SVG element
   const svg = document.getElementById("xpDistributionChart");
-  const width = svg.clientWidth || 800;
+  const width = svg.clientWidth || 1100;
   const height = svg.clientHeight || 400;
   const padding = { top: 40, right: 30, bottom: 60, left: 60 };
 
@@ -734,7 +734,7 @@ function renderXPDistributionChart(transactions) {
   // Create bars and labels
   const bars = categoryData
     .map((d, i) => {
-      const x = padding.left + (barWidth + barGap) * i;
+      const x = padding.left + (barWidth + barGap) * i + 20;
       const barHeight = d.xp * yScale;
       const y = height - padding.bottom - barHeight;
 
