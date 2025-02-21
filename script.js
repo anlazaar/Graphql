@@ -437,15 +437,6 @@ function renderXPProgressChart(transactions) {
       `;
       })
       .join("")}
-    
-    <!-- Chart title -->
-    <text
-      x="${width / 2}"
-      y="30"
-      fill="white"
-      text-anchor="middle"
-      style="font-size: 18px; font-weight: bold;"
-    >XP Progress Over Time</text>
   `;
 }
 
