@@ -320,8 +320,8 @@ function renderXPProgressChart(transactions) {
 
   // Get SVG dimensions
   const svg = document.getElementById("xpChart");
-  const width = svg.clientWidth || 1200; // Fallback width
-  const height = svg.clientHeight || 400; // Fallback height
+  const width =  1150; // Fallback width
+  const height = 400; // Fallback height
   const padding = 60; // Increased padding for labels
 
   // Clear previous content
@@ -344,11 +344,6 @@ function renderXPProgressChart(transactions) {
   const gridLines = [];
   const yLabels = [];
   const numGridLines = 5;
-
-  // Function to format XP values (e.g., adding commas)
-  function formatXP(xp) {
-    return xp.toLocaleString();
-  }
 
   for (let i = 0; i <= numGridLines; i++) {
     const y = height - padding - ((height - 2 * padding) * i) / numGridLines;
