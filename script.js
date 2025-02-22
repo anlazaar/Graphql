@@ -635,8 +635,8 @@ function renderXPDistributionChart(transactions) {
     return;
   }
 
-  // Filter XP transactions and group by path category
-  const xpByCategory = transactions
+  // Filter XP transactions and group by path project
+  const xpByproject = transactions
     .filter(
       (tx) =>
         tx.type === "xp" &&
@@ -644,18 +644,18 @@ function renderXPDistributionChart(transactions) {
         !tx.path.includes("piscine")
     )
     .reduce((acc, tx) => {
-      const category = tx.path.split("/")[3] || "other";
-      acc[category] = (acc[category] || 0) + tx.amount;
+      const project = tx.path.split("/")[3] || "other";
+      acc[project] = (acc[project] || 0) + tx.amount;
       return acc;
     }, {});
 
   // Convert to array and sort by XP amount
-  const categoryData = Object.entries(xpByCategory)
-    .map(([category, xp]) => ({ category, xp }))
+  const projectData = Object.entries(xpByproject)
+    .map(([project, xp]) => ({ project, xp }))
     .sort((a, b) => b.xp - a.xp)
     .slice(0, 6); // Show top 5 project
 
-  console.log("XP by category:", categoryData);
+  console.log("XP by project:", projectData);
 
   // Get SVG element
   const svg = document.getElementById("xpDistributionChart");
@@ -667,11 +667,11 @@ function renderXPDistributionChart(transactions) {
   svg.innerHTML = "";
 
   // Calculate scales
-  const maxXP = Math.max(...categoryData.map((d) => d.xp));
+  const maxXP = Math.max(...projectData.map((d) => d.xp));
   const barWidth =
-    ((width - padding.left - padding.right) / categoryData.length) * 0.8;
+    ((width - padding.left - padding.right) / projectData.length) * 0.8;
   const barGap =
-    ((width - padding.left - padding.right) / categoryData.length) * 0.2;
+    ((width - padding.left - padding.right) / projectData.length) * 0.2;
   const yScale = (height - padding.top - padding.bottom) / maxXP;
 
   // Format XP values properly
@@ -734,15 +734,15 @@ function renderXPDistributionChart(transactions) {
   }
 
   // Create bars and labels
-  const bars = categoryData
+  const bars = projectData
     .map((d, i) => {
       const x = padding.left + (barWidth + barGap) * i + 20;
       const barHeight = d.xp * yScale;
       const y = height - padding.bottom - barHeight;
 
       return `
-      <g class="bar-group" data-category="${projectNameFormater(
-        d.category
+      <g class="bar-group" data-project="${projectNameFormater(
+        d.project
       )}" data-xp="${d.xp}">
         <rect 
           x="${x}"
@@ -781,7 +781,7 @@ function renderXPDistributionChart(transactions) {
         "
           style="font-size: 14px; opacity: 0;"
         >
-          ${projectNameFormater(d.category)}
+          ${projectNameFormater(d.project)}
           <animate 
             attributeName="opacity" 
             from="0" 
@@ -859,9 +859,9 @@ function renderXPDistributionChart(transactions) {
 
   svg.querySelectorAll(".bar-group").forEach((group) => {
     group.addEventListener("mousemove", (e) => {
-      const category = group.dataset.category;
+      const project = group.dataset.project;
       const xp = formatXP(parseInt(group.dataset.xp));
-      tooltip.innerHTML = `${category}: ${xp}`;
+      tooltip.innerHTML = `${project}: ${xp}`;
       tooltip.style.left = `${e.pageX + 10}px`;
       tooltip.style.top = `${e.pageY - 10}px`;
       tooltip.style.opacity = "1";
@@ -877,13 +877,6 @@ function renderXPDistributionChart(transactions) {
 window.onload = () => {
   if (localStorage.getItem("jwt")) loadProfile();
 };
-
-// Render SVG Charts
-function renderCharts(user) {}
-
-function renderProjectChart(progresses) {}
-
-// Page Navigation
 
 // Initial Check
 window.onload = () => {
