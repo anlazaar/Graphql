@@ -520,7 +520,7 @@ function renderProjectSuccessChart(progresses) {
       <animate attributeName="stroke-dasharray" 
                from="0 ${circumference}" 
                to="${dashArray} ${circumference}" 
-               dur="3.5s" 
+               dur="4.5s" 
                fill="freeze" 
                calcMode="spline"
                keySplines="0.42 0 0.58 1"
