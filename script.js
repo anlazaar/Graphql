@@ -7,6 +7,12 @@ function logout() {
 }
 
 // HELPERS
+const projectNameFormater = (projectName) =>
+  projectName
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
 function formatXP(xp) {
   if (xp >= 1000000) {
     return Math.round(xp / 1000000) + " MB";
@@ -320,7 +326,7 @@ function renderXPProgressChart(transactions) {
 
   // Get SVG dimensions
   const svg = document.getElementById("xpChart");
-  const width =  1150; // Fallback width
+  const width = 1150; // Fallback width
   const height = 400; // Fallback height
   const padding = 60; // Increased padding for labels
 
@@ -581,8 +587,9 @@ function renderProjectSuccessChart(progresses) {
     }`;
 
     const projectName = document.createElement("span");
-    projectName.textContent =
-      project.path.split("/")[project.path.split("/").length - 1];
+    projectName.textContent = projectNameFormater(
+      project.path.split("/")[project.path.split("/").length - 1]
+    );
 
     listItem.appendChild(statusIndicator);
     listItem.appendChild(projectName);
@@ -734,7 +741,9 @@ function renderXPDistributionChart(transactions) {
       const y = height - padding.bottom - barHeight;
 
       return `
-      <g class="bar-group" data-category="${d.category}" data-xp="${d.xp}">
+      <g class="bar-group" data-category="${projectNameFormater(
+        d.category
+      )}" data-xp="${d.xp}">
         <rect 
           x="${x}"
           y="${height - padding.bottom}"
@@ -772,7 +781,7 @@ function renderXPDistributionChart(transactions) {
         "
           style="font-size: 14px; opacity: 0;"
         >
-          ${d.category}
+          ${projectNameFormater(d.category)}
           <animate 
             attributeName="opacity" 
             from="0" 
