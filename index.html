@@ -6,72 +6,227 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="icon" type="image/x-icon" href="graphql.svg" />
     <title>Student Profile - Zone01</title>
-    <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
   </head>
   <body>
     <!-- Login Page -->
     <div id="loginPage" class="login-container">
-      <form class="login-form" id="handleLogin">
-        <h1>Zone01 Login</h1>
-        <div class="form-group">
-          <input type="text" id="username" placeholder="Username or Email" />
-        </div>
-        <div class="form-group">
-          <input type="password" id="password" placeholder="Password" />
-        </div>
-        <button class="button" type="submit">Sign In</button>
-        <div id="errorMessage" class="error-message"></div>
-      </form>
+      <div class="login-card">
+        <form class="login-form" id="handleLogin">
+          <div class="login-header">
+            <div class="logo">
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                ></path>
+                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </div>
+            <h1>Zone01 Dashboard</h1>
+            <p class="login-subtitle">Sign in to access your student profile</p>
+          </div>
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="Enter your username or email"
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Enter your password"
+            />
+          </div>
+          <button class="button" type="submit">
+            <span>Sign In</span>
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+          <div id="errorMessage" class="error-message"></div>
+        </form>
+      </div>
     </div>
 
-    <!-- Profile Page -->
+    <!-- Loading Overlay -->
     <div class="loading" id="loading">
       <div class="spinner"></div>
     </div>
+
+    <!-- Profile Page -->
     <div id="profilePage" style="display: none">
-      <div class="profile-header">
-        <h1 id="userName"></h1>
-        <p id="userEmail"></p>
-      </div>
+      <header class="app-header">
+        <div class="header-content">
+          <div class="user-info">
+            <div class="avatar">
+              <span id="userInitial"></span>
+            </div>
+            <div>
+              <h1 id="userName"></h1>
+              <p id="userEmail"></p>
+            </div>
+          </div>
+          <button class="logout-btn" id="logoutButton">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </header>
 
       <div class="container">
         <div class="stats-grid">
-          <button class="logout-btn" id="logoutButton">Logout</button>
           <div class="stat-card">
-            <h3>Total XP</h3>
-            <p id="totalXP">0</p>
+            <div class="stat-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h3>Completed Projects</h3>
+              <p id="completedProjects">0</p>
+            </div>
           </div>
           <div class="stat-card">
-            <h3>Audit Ratio</h3>
-            <p id="auditRatio">0</p>
+            <div class="stat-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                ></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h3>Audit Ratio</h3>
+              <p id="auditRatio">0</p>
+            </div>
           </div>
           <div class="stat-card">
-            <h3>Completed Projects</h3>
-            <p id="completedProjects">0</p>
-          </div>
-        </div>
-
-        <div class="graph-container">
-          <h2>XP Progress Over Time</h2>
-          <svg id="xpChart" width="100" height="400"></svg>
-        </div>
-
-        <div class="graph-container">
-          <h2>Project Success Rate</h2>
-          <div class="project-chart-container">
-            <svg id="projectChart" width="100" height="400"></svg>
-            <div class="project-list-container">
-              <h3>Project List :</h3>
-              <ul id="projectList" class="project-list"></ul>
+            <div class="stat-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 20v-6M6 20V10M18 20V4"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h3>Total XP</h3>
+              <p id="totalXP">0</p>
             </div>
           </div>
         </div>
-        <div class="graph-container">
-          <h2>Project Success Rate</h2>
-          <svg id="xpDistributionChart" width="100" height="400"></svg>
+
+        <div class="graph-grid">
+          <div class="graph-card">
+            <div class="card-header">
+              <h2>XP Progress Over Time</h2>
+              <div class="card-actions"></div>
+            </div>
+            <div class="chart-container">
+              <svg id="xpChart" width="100%" height="300"></svg>
+            </div>
+          </div>
+
+          <div class="graph-card">
+            <div class="card-header">
+              <h2>XP Distribution by Project</h2>
+              <div class="card-actions"></div>
+            </div>
+            <div class="chart-container">
+              <svg id="xpDistributionChart" width="100%" height="300"></svg>
+            </div>
+          </div>
+
+          <div class="graph-card project-success-card">
+            <div class="card-header">
+              <h2>Project Success Rate</h2>
+              <div class="card-actions"></div>
+            </div>
+            <div class="project-chart-container">
+              <div class="donut-chart-container">
+                <svg id="projectChart" width="100%" height="300"></svg>
+              </div>
+              <div class="project-list-container">
+                <h3>Project Status</h3>
+                <ul id="projectList" class="project-list"></ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Footer -->
+      <footer class="site-footer">
+        <div class="footer-content">
+          <p>© 2025 All Rights Reserved to Anass Lazaar and Amin Yacoubi</p>
+          <a href="https://zone01oujda.ma/" target="_blank" class="footer-link"
+            >Visit Zone01 Oujda</a
+          >
+        </div>
+      </footer>
     </div>
-    <script type="module" src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
