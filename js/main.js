@@ -72,13 +72,9 @@ function initApp() {
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(handleResize, 250); // Debounce resize events
+    handleResize();
   });
 }
 
 // Run initialization when DOM is loaded
 document.addEventListener("DOMContentLoaded", initApp);
-
-// Also check on window load (for cases where DOM might be ready but resources aren't)
-window.addEventListener("load", () => {
-  if (localStorage.getItem("jwt")) loadProfile();
-});

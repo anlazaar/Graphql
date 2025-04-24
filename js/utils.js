@@ -13,7 +13,7 @@ export function formatXP(xp) {
   } else if (xp >= 1000) {
     return (xp / 1000).toFixed(1).replace(/\.0$/, "") + " kB";
   } else {
-    return xp + " B"; // Add "B" for bytes
+    return xp + " B";
   }
 }
 
