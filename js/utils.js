@@ -1,4 +1,3 @@
-
 export function projectNameFormater(projectName) {
   return projectName
     .split("-")
@@ -25,7 +24,6 @@ export function totalXPCalculate(transactions) {
           (tx.path.startsWith("/oujda/module/") &&
             !tx.path.includes("onboarding") &&
             !tx.path.includes("piscine-js") &&
-            !tx.path.includes("checkpoint") &&
             tx.type == "xp") ||
           tx.path == "/oujda/module/piscine-js"
         ) {
@@ -78,5 +76,3 @@ export function auditRatioCalculator(transactions) {
       : "0.0";
   return auditRatio;
 }
-
-

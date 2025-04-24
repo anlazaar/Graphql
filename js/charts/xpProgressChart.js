@@ -24,12 +24,11 @@ export function renderXPProgressChart(transactions) {
   const xpData = transactions
     .filter(
       (tx) =>
-        tx.type === "xp" &&
-        tx.path.startsWith("/oujda/module/") &&
-        !tx.path.includes("piscine") &&
-        !tx.path.includes("piscine-go") &&
-        !tx.path.includes("piscine-js") &&
-        !tx.path.includes("onboarding")
+        (tx.path.startsWith("/oujda/module/") &&
+          !tx.path.includes("onboarding") &&
+          !tx.path.includes("piscine-js") &&
+          tx.type == "xp") ||
+        tx.path == "/oujda/module/piscine-js"
     )
     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
