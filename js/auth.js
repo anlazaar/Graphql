@@ -7,9 +7,9 @@ export function logout() {
 
 export async function handleLogin(e) {
   e.preventDefault();
-  const username = document.getElementById("username").value;
+  const usernameOrEmail = document.getElementById("username").value;
   const password = document.getElementById("password").value;
-  const credentials = btoa(`${username}:${password}`);
+  const credentials = btoa(`${usernameOrEmail}:${password}`);
 
   try {
     const response = await fetch(AUTH_URL, {
@@ -27,7 +27,7 @@ export async function handleLogin(e) {
     let jwt = await response.text();
     jwt = jwt.replaceAll('"', ""); // Remove any quotes
 
-    // Validate JWT format
+    // Validate JWT format [header, payload, signature]
     const parts = jwt.split(".");
     if (parts.length !== 3) {
       throw new Error(
@@ -40,7 +40,9 @@ export async function handleLogin(e) {
     return true; // Return success
   } catch (error) {
     console.error("Login error:", error);
-    document.getElementById("errorMessage").textContent = error.message;
+    document.getElementById("errorMessage").textContent =
+      "failed to login !, verify your credentials and try again";
+    console.log(error.message);
     return false;
   }
 }

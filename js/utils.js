@@ -57,22 +57,17 @@ export function completedProjectsCalculation(progresses) {
   return successfulProjects;
 }
 
-export function auditRatioCalculator(transactions) {
-  let auditsDone = 0; // "up" type
-  let auditsReceived = 0; // "down" type
-  if (transactions) {
-    transactions.forEach((tx) => {
-      if (tx.type === "up") {
-        auditsDone += tx.amount;
-      } else if (tx.type === "down") {
-        auditsReceived += tx.amount;
-      }
-    });
-  }
+export function auditRatioCalculator(transactions = []) {
+  const { auditsDone, auditsReceived } = transactions.reduce(
+    (acc, { type, amount }) => {
+      if (type === "up") acc.auditsDone += amount;
+      else if (type === "down") acc.auditsReceived += amount;
+      return acc;
+    },
+    { auditsDone: 0, auditsReceived: 0 }
+  );
 
-  const auditRatio =
-    auditsReceived > 0
-      ? (Math.ceil((auditsDone / auditsReceived) * 100) / 100).toFixed(1)
-      : "0.0";
-  return auditRatio;
+  if (!auditsReceived) return "0.0";
+
+  return (Math.ceil((auditsDone / auditsReceived) * 100) / 100).toFixed(1);
 }

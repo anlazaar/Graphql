@@ -70,8 +70,6 @@ export function renderXPProgressChart(transactions) {
       linePathData = `M ${x} ${y}`;
       areaPathData += ` L ${x} ${y}`;
     } else {
-      // For stepped effect, we add a horizontal line to the current x position
-      // at the previous y level, then a vertical line to the current y level
       const prevY = height - padding.bottom - dataPoints[i - 1].xp * yScale;
       linePathData += ` L ${x - xScale / 2} ${prevY} L ${
         x - xScale / 2
@@ -330,17 +328,6 @@ function setupTooltip(svg, dataPoints, xScale, yScale, padding, height) {
         circle.setAttribute("r", "4");
         circle.setAttribute("stroke-width", "1.5");
       }
-    });
-  });
-
-  svg.addEventListener("mouseleave", () => {
-    tooltip.style.opacity = "0";
-
-    // Reset all points
-    const circles = svg.querySelectorAll(".data-point");
-    circles.forEach((circle) => {
-      circle.setAttribute("r", "4");
-      circle.setAttribute("stroke-width", "1.5");
     });
   });
 }

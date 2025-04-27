@@ -26,7 +26,7 @@ export function renderProfile(user) {
   // Set user initial for avatar
   const userInitial = document.getElementById("userInitial");
   if (userInitial) {
-    userInitial.textContent = user.login.charAt(0).toUpperCase();
+    userInitial.textContent = user.login.slice(0, 2).toUpperCase();
   }
 
   const totalXP = totalXPCalculate(user.transactions);
